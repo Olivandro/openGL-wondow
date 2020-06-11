@@ -117,7 +117,7 @@ int main(void)
         // glVertex2f(0.5f, -0.5f);
         // glEnd();
 
-        // Draw pull
+        // Draw pull or function..
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
@@ -126,6 +126,8 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
+
+    glDeleteProgram(shader);
 
     glfwTerminate();
     return 0;
