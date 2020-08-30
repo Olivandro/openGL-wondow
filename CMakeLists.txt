@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project (GLFW-Window-Test VERSION 1.0)
-find_library(GLFW_INCLUDE_LIB libglfw3.a ${CMAKE_SOURCE_DIR}/GLFW/lib-macos)
-find_library(GLEW_INCLUDE_LIB libGLEW.a ${CMAKE_SOURCE_DIR}/GL/lib)
+find_library(GLFW_INCLUDE_LIB libglfw3.a ${CMAKE_SOURCE_DIR}/GLFW/src)
+find_library(GLEW_INCLUDE_LIB libGLEW.a ${CMAKE_SOURCE_DIR}/glew-2.1.0/lib)
 find_library(GLUS_INCLUDE_LIB libGLUS.a ${CMAKE_SOURCE_DIR}/GL/lib)
 
 set(CMAKE_C_STANDARD 11)
@@ -18,7 +18,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build)
 file(GLOB SOURCES "main.c")
 
 set(GLFW_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/GLFW/include)
-set(GL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/GL/include)
+set(GL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/glew-2.1.0/include)
 
 
 
