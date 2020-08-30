@@ -4,3 +4,10 @@ cmake_install.cmake_install
 CMakeFiles
 build
 Makefile
+
+# Glew ignore settings
+glew-2.1.0/tmp
+glew-2.1.0/lib
+glew-2.1.0/bin
+glew-2.1.0/glew.pc
+!glew-2.1.0/Makefile
