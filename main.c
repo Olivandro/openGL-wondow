@@ -11,14 +11,24 @@ struct ShaderSource
 
 struct ShaderSource parseShader(const char filepath[])
 {
+    // instantiate a temp version of our struct
     struct ShaderSource tmp;
 
+    // Open our target file for parsing. This is the shader source
     FILE *fp = fopen(filepath, "r");
 
+    // Establish a buffer array for the file stream 
     const char buffer[512];
+
+    // unsigned char ptr that has the same size array as the buffer and 
+    // struct variables. This is probably not needed... Checking in on 
+    // that.
+    unsigned char (*src)[512];
+
+    // Determiners... These values determine when parsing if source code pertains to
+    // a vertex or a fragment shader.
     char divider[] = "#shader";
     char version[] = "#version";
-    char (*src)[512];
     char v[] = "vertex";
     char f[] = "fragment";
 
@@ -26,7 +36,6 @@ struct ShaderSource parseShader(const char filepath[])
     {
         if (strstr(buffer, divider))
         {
-
             if (strstr(buffer, v))
             {
                 src = &tmp.VertexShader;
@@ -35,7 +44,6 @@ struct ShaderSource parseShader(const char filepath[])
             {
                 src = &tmp.FragmentShader;
             }
-            
         }
         else if (strstr(buffer, version))
         {
@@ -48,6 +56,8 @@ struct ShaderSource parseShader(const char filepath[])
     }
     // Lets close that file as we don't need it.
     fclose(fp);
+
+    // Return our parsed shader sources.
     return tmp;
 }
 

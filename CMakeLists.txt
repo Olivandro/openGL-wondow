@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project (GLFW-Window-Test VERSION 1.0)
 find_library(GLFW_INCLUDE_LIB libglfw3.a ${CMAKE_SOURCE_DIR}/GLFW/src)
 find_library(GLEW_INCLUDE_LIB libGLEW.a ${CMAKE_SOURCE_DIR}/glew-2.1.0/lib)
-find_library(GLUS_INCLUDE_LIB libGLUS.a ${CMAKE_SOURCE_DIR}/GL/lib)
 
 if(UNIX AND NOT APPLE)
 find_package(OpenGL REQUIRED)
@@ -45,4 +44,3 @@ endif()
 
 target_link_libraries(window PRIVATE ${GLFW_INCLUDE_LIB})
 target_link_libraries(window PRIVATE ${GLEW_INCLUDE_LIB})
-target_link_libraries(window PRIVATE ${GLUS_INCLUDE_LIB})
