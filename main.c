@@ -1,6 +1,55 @@
 #include <stdio.h>
+#include <string.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+struct ShaderSource
+{
+    char VertexShader[512];
+    char FragmentShader[512];
+};
+
+struct ShaderSource parseShader(const char filepath[])
+{
+    struct ShaderSource tmp;
+
+    FILE *fp = fopen(filepath, "r");
+
+    const char buffer[512];
+    char divider[] = "#shader";
+    char version[] = "#version";
+    char (*src)[512];
+    char v[] = "vertex";
+    char f[] = "fragment";
+
+    while(fgets(buffer, 512, fp))
+    {
+        if (strstr(buffer, divider))
+        {
+
+            if (strstr(buffer, v))
+            {
+                src = &tmp.VertexShader;
+            }
+            else if (strstr(buffer, f))
+            {
+                src = &tmp.FragmentShader;
+            }
+            
+        }
+        else if (strstr(buffer, version))
+        {
+            strcpy(src, buffer);
+        }
+        else
+        {
+            strcat(src, buffer);
+        }
+    }
+    // Lets close that file as we don't need it.
+    fclose(fp);
+    return tmp;
+}
 
 static unsigned int compileShader(unsigned int type, const char source[]) 
 {
@@ -99,9 +148,13 @@ int main(void)
     // Unbind buffer... Necessary to reduce overhead and prevent weird behaviour
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    char vertexShader[] = "#version 120\n\nattribute vec4 position;\n\nvoid main(){ gl_Position = position; }\n";
-    char fragmentShader[] = "#version 120\n\nvoid main(){ gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }\n";
-    unsigned int shader = createShader(vertexShader, fragmentShader);
+    // char vertexShader[] = "#version 120\n\nattribute vec4 position;\n\nvoid main(){ gl_Position = position; }\n";
+    // char fragmentShader[] = "#version 120\n\nvoid main(){ gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }\n";
+    
+    char filepath[] = "shaders/basic.shader";
+    struct ShaderSource Source = parseShader(filepath);
+
+    unsigned int shader = createShader(Source.VertexShader, Source.FragmentShader);
     glUseProgram(shader);
 
     /* Loop until the user closes the window */
