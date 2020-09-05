@@ -23,9 +23,8 @@ static bool GLLogCall(const char *function, const char *file, const int line)
     // within the while statement clause. This cause all sorts of problems
     // for the IDE, compiler etc. 
     int error;
-    while (glGetError())
+    while ((error = glGetError()) != GL_NO_ERROR)
     {
-        error = glGetError();
         printf("OpenGL Error code: %d\n", error);
         printf("Error occurred at function: %s\n", function);
         printf("File: %s\n", file);
