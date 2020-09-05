@@ -58,7 +58,7 @@ struct ShaderSource parseShader(const char filepath[])
     // Establish a buffer array for the file stream 
     const char buffer[512];
 
-    // unsigned char ptr that has the same size array as the buffer and 
+    // unsigned char ptr array that has the same size array as the buffer and 
     // struct variables. This is probably not needed... Checking in on 
     // that.
     unsigned char (*src)[512];

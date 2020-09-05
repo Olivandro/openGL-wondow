@@ -15,7 +15,7 @@ set(CMAKE_C_FLAGS "-framework Cocoa -framework OpenGL -framework IOKit -framewor
 endif()
 
 if(UNIX AND NOT APPLE)
-SET(CMAKE_C_FLAGS "-lm -pthread")
+SET(CMAKE_C_FLAGS "-lm -pthread -lX11")
 endif()
 
 
