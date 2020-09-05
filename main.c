@@ -1,8 +1,31 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// GL Error handing functions
+void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+void GLCheckError()
+{
+    char * error;
+    while (error = glGetError())
+    {
+        printf("OpenGL Error: %s\n", error);
+    }
+}
+
+// GLFW Error handing
+void glfwErrorCallback(int error, const char description[]) {
+    printf("\nGLFW Error: %s\n\n", description);
+}
+
+
+// Shader parsing and struct. parseShader would be considered a public function.
 struct ShaderSource
 {
     char VertexShader[512];
@@ -61,6 +84,7 @@ struct ShaderSource parseShader(const char filepath[])
     return tmp;
 }
 
+// Shader compiler. Embedded function, used within createShader
 static unsigned int compileShader(unsigned int type, const char source[]) 
 {
     unsigned int id = glCreateShader(type);
@@ -85,7 +109,8 @@ static unsigned int compileShader(unsigned int type, const char source[])
     return id;
 };
 
-static unsigned int createShader(const char vertexShader[], const char fragmentShader[]) 
+// Public function createShader. Call to create shaders and attach shaders to program
+unsigned int createShader(const char vertexShader[], const char fragmentShader[]) 
 {
     unsigned int program = glCreateProgram();
     unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShader);
@@ -110,10 +135,16 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
+    glfwSetErrorCallback(glfwErrorCallback);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
-    {
+    {   
         glfwTerminate();
         return -1;
     }
@@ -152,7 +183,12 @@ int main(void)
         2, 3, 0
     };
 
-    // Binding for Array Buffer
+    // Vertex array elements
+    // unsigned int vao;
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
+
+    // Binding for vertex Buffer
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     // Bind buffer to layer
@@ -185,6 +221,11 @@ int main(void)
     float r = 0.0f;
     float increment = 0.05f;
 
+    // Unbind all buffers and shader programs 
+    glUseProgram(0);
+    // glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -192,8 +233,25 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Bind shader program
+        glUseProgram(shader);
         // Animation of colour
         glUniform4f(location, r, 0.0, 0.0, 1.0);
+
+        // bindng our vertex buffer.
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        // Elements related to vertex array object.
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+
+        // Currently not workin...
+        // // Bind vertex array
+        // glBindVertexArray(vao);
+
+        // Index buffer binding
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
         // Draw pull or function..
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 

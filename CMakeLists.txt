@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project (GLFW-Window-Test VERSION 1.0)
-find_library(GLFW_INCLUDE_LIB libglfw3.a ${CMAKE_SOURCE_DIR}/GLFW/src)
+find_library(GLFW_INCLUDE_LIB libglfw3.a ${CMAKE_SOURCE_DIR}/glfw-3.3.2/src)
 find_library(GLEW_INCLUDE_LIB libGLEW.a ${CMAKE_SOURCE_DIR}/glew-2.1.0/lib)
 
 if(UNIX AND NOT APPLE)
@@ -26,7 +26,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build)
 
 file(GLOB SOURCES "main.c")
 
-set(GLFW_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/GLFW/include)
+set(GLFW_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/glfw-3.3.2/include)
 set(GL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/glew-2.1.0/include)
 
 
