@@ -1,29 +1,41 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// GL Error handing functions
-void GLClearError()
+// GL Error handing functions plus compiler directives
+#define assert(x) if(!(x)) return -1;
+#define GLCall(x) GLClearError();\
+    x;\
+    assert(GLLogCall())\
+
+static void GLClearError()
 {
     while (glGetError() != GL_NO_ERROR);
 }
 
-void GLCheckError()
+static bool GLLogCall()
 {
-    char * error;
-    while (error = glGetError())
+    // The breakdown of this compared to tutorial is 
+    // quite different. Within the tutorial Cherno init and assigns GLenum error
+    // within the while statement clause. This cause all sorts of problems
+    // for the IDE, compiler etc. 
+    GLenum error;
+    while (glGetError())
     {
-        printf("OpenGL Error: %s\n", error);
+        error = glGetError();
+        printf("OpenGL Error code: %d\n", error);
+        return false;
     }
+    return true;
 }
 
 // GLFW Error handing
 void glfwErrorCallback(int error, const char description[]) {
     printf("\nGLFW Error: %s\n\n", description);
 }
-
 
 // Shader parsing and struct. parseShader would be considered a public function.
 struct ShaderSource
@@ -137,6 +149,9 @@ int main(void)
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    // Due to version limitation of Mac OSX openGL version 
+    // GLFW_OPENGL_ANY_PROFILE is currently the only profile that is usable
+    // Otehrwise you'll received... GLFW Error: Context profiles are only defined for OpenGL version 3.2 and above
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 
     glfwSetErrorCallback(glfwErrorCallback);
@@ -183,6 +198,8 @@ int main(void)
         2, 3, 0
     };
 
+    // Currently not workin... Reason for not working is because OpenGL version is
+    // to lower to implement the Core profile. 
     // Vertex array elements
     // unsigned int vao;
     // glGenVertexArrays(1, &vao);
@@ -245,15 +262,16 @@ int main(void)
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
 
-        // Currently not workin...
+        // Currently not workin... Reason for not working is because OpenGL version is
+        // to lower to implement the Core profile. 
         // // Bind vertex array
         // glBindVertexArray(vao);
 
         // Index buffer binding
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 
         // Draw pull or function..
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
 
         // Colour animation.
         if (r > 1.0f)

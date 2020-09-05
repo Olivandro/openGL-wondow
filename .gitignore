@@ -4,6 +4,7 @@ cmake_install.cmake_install
 CMakeFiles
 build
 Makefile
+.vscode
 
 # Glew ignore settings
 glew-2.1.0/tmp
