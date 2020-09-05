@@ -9,24 +9,27 @@
 #define assert(x) if(!(x)) return -1;
 #define GLCall(x) GLClearError();\
     x;\
-    assert(GLLogCall())\
+    assert(GLLogCall(#x, __FILE__, __LINE__))\
 
 static void GLClearError()
 {
     while (glGetError() != GL_NO_ERROR);
 }
 
-static bool GLLogCall()
+static bool GLLogCall(const char *function, const char *file, const int line)
 {
     // The breakdown of this compared to tutorial is 
     // quite different. Within the tutorial Cherno init and assigns GLenum error
     // within the while statement clause. This cause all sorts of problems
     // for the IDE, compiler etc. 
-    GLenum error;
+    int error;
     while (glGetError())
     {
         error = glGetError();
         printf("OpenGL Error code: %d\n", error);
+        printf("Error occurred at function: %s\n", function);
+        printf("File: %s\n", file);
+        printf("Line: %d\n\n", line);
         return false;
     }
     return true;
