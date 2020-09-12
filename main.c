@@ -5,6 +5,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// Defining compiler directives to identify with OS is Apple. This is because Apple has its own subset 
+// functions for glGenVertexArrays, glBindVertexArray, glDeleteVertexArrays.
+#ifdef __APPLE__
+#define glGenVertexArrays glGenVertexArraysAPPLE
+#define glBindVertexArray glBindVertexArrayAPPLE
+#define glDeleteVertexArrays glDeleteVertexArraysAPPLE
+#endif
+
 // GL Error handing functions plus compiler directives
 #define assert(x) if(!(x)) return -1;
 #define GLCall(x) GLClearError();\
@@ -20,7 +28,7 @@ static bool GLLogCall(const char *function, const char *file, const int line)
 {
     // The breakdown of this compared to tutorial is 
     // quite different. Within the tutorial Cherno init and assigns GLenum error
-    // within the while statement clause. This cause all sorts of problems
+    // within the while statement clause. This causes all sorts of problems
     // for the IDE, compiler etc. 
     int error;
     while ((error = glGetError()) != GL_NO_ERROR)
@@ -141,6 +149,50 @@ unsigned int createShader(const char vertexShader[], const char fragmentShader[]
     return program;
 };
 
+// Rendering functions for abstractions and easier implimentation...
+
+// 1. Generating vertex buffer and quick binding and unbinding functions
+// vertexBuffer function generates a buffer, binds it and assigns it data
+// On successful pass return 0, otherwise GLCall will return -1 with corresponding
+// error code.
+int vertexBuffer(unsigned int buffer, const void* data, unsigned int size)
+{
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+    return 0;
+} 
+
+// Unbind vertext buffer.
+int vertexBufferUnbind()
+{
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    return 0;
+}
+
+// 2. Index buffer abstracted functions....
+int indexBuffer(unsigned int ibo, const unsigned int data[], unsigned int count)
+{
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
+    return 0;
+}
+
+int indexBufferBind(unsigned int ibo)
+{
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    return 0;
+}
+
+int indexBufferUnbind()
+{
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    return 0;
+}
+
+
+
 int main(void)
 {
     GLFWwindow* window;
@@ -200,32 +252,24 @@ int main(void)
         2, 3, 0
     };
 
-    // Currently not workin... Reason for not working is because OpenGL version is
-    // to lower to implement the Core profile. 
     // Vertex array elements
-    // unsigned int vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
+    unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
 
     // Binding for vertex Buffer
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    // Bind buffer to layer
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    vertexBuffer(buffer, positions, 4 * 2 * sizeof(float));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     // Binding for index buffer
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    // Bind buffer to layer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-    // Unbind buffer... Necessary to reduce overhead and prevent weird behaviour
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    // indexBuffer(ibo, indices, 6);
 
     
     char filepath[] = "shaders/basic.shader";
@@ -242,8 +286,10 @@ int main(void)
 
     // Unbind all buffers and shader programs 
     glUseProgram(0);
-    // glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vertexBufferUnbind();
+    // indexBufferUnbind();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     /* Loop until the user closes the window */
@@ -256,24 +302,17 @@ int main(void)
         glUseProgram(shader);
         // Animation of colour
         glUniform4f(location, r, 0.0, 0.0, 1.0);
-
-        // bindng our vertex buffer.
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        // Elements related to vertex array object.
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-
-
-        // Currently not workin... Reason for not working is because OpenGL version is
-        // to lower to implement the Core profile. 
+ 
         // // Bind vertex array
-        // glBindVertexArray(vao);
+        GLCall(glBindVertexArray(vao));
 
         // Index buffer binding
         GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+        // indexBufferBind(ibo);
 
         // Draw pull or function..
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
+        // GLCall(glDrawArrays(GL_TRIANGLES, 0, 4));
 
         // Colour animation.
         if (r > 1.0f)
