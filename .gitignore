@@ -6,6 +6,10 @@ build
 Makefile
 .vscode
 
+# Linting IDE files for c/c++ clangd
+compile_commands.json
+.clangd
+
 # Glew ignore settings
 glew-2.1.0/tmp
 glew-2.1.0/lib

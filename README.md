@@ -9,12 +9,12 @@ Currently this C Library is wired up in the `CmakeLists.txt`, thus you should on
 
 From the root of the project direct using the terminal, enter codes below:
 ```
-# cd GLFW
-# cmake ./
-# make
-# cd ../glew-2.1.0
-# make
-#cd ..
+$ cd glfw-3.3.2
+$ cmake ./
+$ make
+$ cd ../glew-2.1.0
+$ make
+$ cd ..  # Let go back to the root of this project folder.
 ```
 
 To explain, we are changing dir to the GLFW dir first, running `cmake` to prep the Makefile doc, and then finally running `make` from within the GLFW dir. Once its finished compiling we change dir to the glew-2.1.0 dir where we only run `make` (please see GLEW compile documentation if you would like to know more). After GLEW is finished compiling we change back to the root of the project. 
@@ -23,9 +23,17 @@ From here we can compile our `main.c` file without worrying about connecting to 
 
 To compile the basic example with this repo, from the root of the project enter these commands:
 ```
-# mkdir build
-# cmake ./ build/
-# make
+$ mkdir build
+$ cmake . build/ 
+
+# If you are using VS Codium I would recommend running:
+
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 . build
+
+# The reason for this is to generate a compile_commands.json file and the .clangd dir which will create links to your 
+# dependancies and get clangd to work correctly
+
+$ make
 ```
 
 This should complete the compiling of the basic example. The output binary will be located in `build` dir and will be named `window`.
