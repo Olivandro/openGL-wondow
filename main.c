@@ -162,6 +162,11 @@ int vertexBuffer(unsigned int buffer, const void* data, unsigned int size)
     GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
     return 0;
 } 
+int vertexBufferBind(unsigned int buffer)
+{
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    return 0;
+}
 
 // Unbind vertext buffer.
 int vertexBufferUnbind()
@@ -170,12 +175,15 @@ int vertexBufferUnbind()
     return 0;
 }
 
-// 2. Index buffer abstracted functions....
-int indexBuffer(unsigned int ibo, const unsigned int data[], unsigned int count)
+// 2. Index buffer abstracted functions.... Here we only bind the index buffer
+// and bind the corresponding data to the ib object. We do not gen a buffer
+// for the ibo, because this causes a program crash with no error returned.
+// This function must be called after glGenBuffers(GLsizei n, GLuint* buffers)
+int indexBuffer(unsigned int ibo, const unsigned int* data, unsigned int count)
 {
     GLCall(glGenBuffers(1, &ibo));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW));
     return 0;
 }
 
@@ -257,21 +265,19 @@ int main(void)
     GLCall(glGenVertexArrays(1, &vao));
     GLCall(glBindVertexArray(vao));
 
+
     // Binding for vertex Buffer
     unsigned int buffer;
     vertexBuffer(buffer, positions, 4 * 2 * sizeof(float));
-
+    
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     // Binding for index buffer
     unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
-    // indexBuffer(ibo, indices, 6);
+    assert(sizeof(unsigned int) == sizeof(GLuint));
+    indexBuffer(ibo, indices, 6 * sizeof(unsigned int));
 
-    
     char filepath[] = "shaders/basic.shader";
     struct ShaderSource Source = parseShader(filepath);
 
@@ -287,10 +293,8 @@ int main(void)
     // Unbind all buffers and shader programs 
     glUseProgram(0);
     glBindVertexArray(0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
     vertexBufferUnbind();
-    // indexBufferUnbind();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    indexBufferUnbind();
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -300,20 +304,19 @@ int main(void)
 
         // Bind shader program
         glUseProgram(shader);
+
         // Animation of colour
         glUniform4f(location, r, 0.0, 0.0, 1.0);
- 
+
         // // Bind vertex array
         GLCall(glBindVertexArray(vao));
 
         // Index buffer binding
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-        // indexBufferBind(ibo);
+        indexBufferBind(ibo);
 
         // Draw pull or function..
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
-        // GLCall(glDrawArrays(GL_TRIANGLES, 0, 4));
-
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &indices));
+        
         // Colour animation.
         if (r > 1.0f)
             increment = -0.05f;
@@ -324,13 +327,18 @@ int main(void)
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
+    
         /* Poll for and process events */
         glfwPollEvents();
+        
     }
 
     glDeleteProgram(shader);
+    glDeleteBuffers(1, &buffer);
+    glDeleteBuffers(1, &ibo);
+    glDeleteVertexArrays(1, &vao);
 
     glfwTerminate();
+    
     return 0;
 }
